@@ -17,28 +17,47 @@ import torchvision
 import torchvision.transforms as transforms
 from pathlib import Path
 import torch
-from PIL import Image 
+from PIL import Image
+
+
+class CatImg():
+
+    def __init__(self, old_path, save_path):
+        self.old_path = old_path
+        self.save_path = save_path
+        self.save_ext = 'jpg'
+
+        self.trans = transforms.Compose([
+            # transforms.Resize(64),
+            transforms.ToTensor(),
+            # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+
+    def cat(self):
+        paths = glob.glob(os.path.join(self.old_path, '*.jpg'))
+        paths.sort()
+        img_list = []
+        for path in paths:
+            img = Image.open(path).convert('RGB')  # 读取图像
+            img = self.trans(img)
+            # print(img.shape)
+            img_list.append(img)
+        print(len(img_list))
+        # torch.cat(img_list, 0)
+        torchvision.utils.save_image(img_list, str(Path(self.save_path) / f'-dcgan.{self.save_ext}'),
+                                     nrow=5, normalize=True)
 
 
 if __name__ == "__main__":
 
-    trans = transforms.Compose([
-        # transforms.Resize(64),
-        transforms.ToTensor(),
-        # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    ])
-    WSI_MASK_PATH = 'experiments/catimg'
-    paths = glob.glob(os.path.join(WSI_MASK_PATH, '*.jpg'))
-    paths.sort()
-    img_list = []
-    for path in paths:
-        img = Image.open(path).convert('RGB') # 读取图像 
-        img = trans(img)
-        print(img.shape)
-        img_list.append(img)
-    print(len(img_list))
-    ext = 'jpg'
-    save_dir_path = 'experiments/catimg/dcganimg'
-    # torch.cat(img_list, 0)
-    torchvision.utils.save_image(img_list, str(Path(save_dir_path) / f'-dcgan.{ext}'), normalize=True)
+    old_path = 'delFolder/sstegan'
+    save_path = 'delFolder/catSSteGAN'
+    catImg = CatImg(old_path, save_path)
+    catImg.cat()
+
+    old_path = 'delFolder/biggan'
+    save_path = 'delFolder/catBigGAN'
+    catImg2 = CatImg(old_path, save_path)
+    catImg2.cat()
+
     print('ok')
